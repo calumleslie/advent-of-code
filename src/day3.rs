@@ -1,9 +1,11 @@
 use std::error::Error;
 use std::fs;
 use std::str::FromStr;
+use itertools::Itertools;
+use std::collections::HashSet;
 
-#[derive(Debug, Copy, Clone)]
-struct Claim {
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct Claim {
     n: u32,
     left: u32,
     top: u32,
@@ -59,6 +61,18 @@ impl Claim {
         self.top <= y &&
         self.bottom() > y
     }
+
+    fn overlaps(&self, other: &Claim) -> bool {
+        let h_overlap = 
+            (self.left <= other.left && self.right() >= other.left) ||
+            (other.left <= self.left && other.right() >= self.left);
+
+        let v_overlap =
+            (self.top <= other.top && self.bottom() >= other.top) ||
+            (other.top <= self.top && other.bottom() >= self.top);
+        
+        h_overlap && v_overlap
+    }
 }
 
 fn read_file() -> Result<Vec<Claim>, Box<Error>> {
@@ -83,4 +97,24 @@ pub fn part1() -> Result<i32, Box<Error>> {
     }
 
     Ok(multiple)
+}
+
+pub fn part2() -> Result<Claim, Box<Error>> {
+    let claims = read_file()?;
+    let mut has_overlap: HashSet<Claim> = HashSet::new();
+
+    for (left, right) in claims.iter().tuple_combinations() {
+        if left.overlaps(right) {
+            has_overlap.insert(*left);
+            has_overlap.insert(*right);
+        }
+    }
+
+    for claim in claims {
+        if !has_overlap.contains(&claim) {
+            return Ok(claim);
+        }
+    }
+
+    panic!("No result found");
 }
