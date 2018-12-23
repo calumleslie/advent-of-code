@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs;
 use std::str::FromStr;
 use std::iter::Iterator;
@@ -20,4 +21,17 @@ pub fn part1() -> Result<i32, Box<Error>> {
         frequency = frequency + value;
     }
     Ok(frequency)
+}
+
+pub fn part2() -> Result<i32, Box<Error>> {
+    let mut seen: HashSet<i32> = HashSet::new();
+    let mut frequency = 0;
+    for value in read_file()?.iter().cycle() {
+        frequency = frequency + value;
+        if seen.contains(&frequency) {
+            return Ok(frequency);
+        }
+        seen.insert(frequency);
+    }
+    unreachable!()
 }

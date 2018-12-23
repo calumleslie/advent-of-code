@@ -8,6 +8,7 @@ fn main() -> Result<(), Box<std::error::Error>> {
 
     match &arg_values[1..] {
         ["day1", "part1"] => println!("{}", day1::part1()?),
+        ["day1", "part2"] => println!("{}", day1::part2()?),
         _ => panic!("Don't know how to {:?}", args)
     }
 
