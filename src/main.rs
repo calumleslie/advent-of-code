@@ -1,4 +1,5 @@
 mod day1;
+mod day2;
 
 use std::env;
 
@@ -9,6 +10,8 @@ fn main() -> Result<(), Box<std::error::Error>> {
     match &arg_values[1..] {
         ["day1", "part1"] => println!("{}", day1::part1()?),
         ["day1", "part2"] => println!("{}", day1::part2()?),
+        ["day2", "part1"] => println!("{}", day2::part1()?),
+        ["day2", "part2"] => println!("{}", day2::part2()?),
         _ => panic!("Don't know how to {:?}", args)
     }
 
