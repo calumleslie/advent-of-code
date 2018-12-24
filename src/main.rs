@@ -2,6 +2,7 @@ mod day1;
 mod day2;
 mod day3;
 mod day4;
+mod day5;
 
 use std::env;
 
@@ -18,6 +19,7 @@ fn main() -> Result<(), Box<std::error::Error>> {
         ["day3", "part2"] => println!("{:?}", day3::part2()?),
         ["day4", "part1"] => println!("{}", day4::part1()?),
         ["day4", "part2"] => println!("{}", day4::part2()?),
+        ["day5", "part1"] => println!("{}", day5::part1()?),
         _ => panic!("Don't know how to {:?}", args),
     }
 
