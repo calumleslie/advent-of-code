@@ -11,7 +11,7 @@ fn count_chars(word: &str) -> HashMap<char, u32> {
         *counter += 1;
     }
 
-    return result;
+    result
 }
 
 pub fn part1() -> Result<i32, Box<Error>> {
@@ -31,7 +31,7 @@ pub fn part1() -> Result<i32, Box<Error>> {
         threes += has_three as i32;
     }
 
-    return Ok(twos * threes);
+    Ok(twos * threes)
 }
 
 pub fn part2() -> Result<String, Box<Error>> {

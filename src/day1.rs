@@ -19,7 +19,7 @@ fn read_file() -> Result<Vec<i32>, Box<Error>> {
 pub fn part1() -> Result<i32, Box<Error>> {
     let mut frequency = 0;
     for value in read_file()? {
-        frequency = frequency + value;
+        frequency += value;
     }
     Ok(frequency)
 }
@@ -28,7 +28,7 @@ pub fn part2() -> Result<i32, Box<Error>> {
     let mut seen: HashSet<i32> = HashSet::new();
     let mut frequency = 0;
     for value in read_file()?.iter().cycle() {
-        frequency = frequency + value;
+        frequency += value;
         if seen.contains(&frequency) {
             return Ok(frequency);
         }
