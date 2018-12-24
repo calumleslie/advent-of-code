@@ -130,6 +130,17 @@ fn build_sleep_spans(timeline: &[Entry]) -> Vec<SleepSpan> {
     sleep_spans
 }
 
+fn make_minutes_map(spans: &mut Iterator<Item = &SleepSpan>) -> HashMap<(Guard, Minute), u32> {
+    let mut result: HashMap<(Guard, Minute), u32> = HashMap::new();
+    for span in spans {
+        for minute in span.sleep_minutes() {
+            let counter = result.entry((span.guard, minute)).or_insert(0);
+            *counter += 1;
+        }
+    }
+    result
+}
+
 pub fn part1() -> Result<u32, Box<Error>> {
     let timeline = read_timeline()?;
     let sleep_spans = build_sleep_spans(&timeline);
@@ -149,23 +160,18 @@ pub fn part1() -> Result<u32, Box<Error>> {
         .expect("No sleep times")
         .0;
 
-    let guard_spans = sleep_spans
+    let mut guard_spans = sleep_spans
         .iter()
         .filter(|span| span.guard == longest_guard);
 
-    let mut minutes_commonality: HashMap<Minute, u32> = HashMap::new();
-    for span in guard_spans {
-        for minute in span.sleep_minutes() {
-            let counter = minutes_commonality.entry(minute).or_insert(0);
-            *counter += 1;
-        }
-    }
+    let minute_map = make_minutes_map(&mut guard_spans);
 
-    let most_common_minute: Minute = *minutes_commonality
+    let most_common_minute: Minute = (*minute_map
         .iter()
         .max_by_key(|pair| pair.1)
         .expect("No minutes")
-        .0;
+        .0)
+        .1;
 
     println!(
         "{:?}, {:?}, Product: {}",
@@ -175,4 +181,26 @@ pub fn part1() -> Result<u32, Box<Error>> {
     );
 
     Ok(longest_guard.0 * most_common_minute.0)
+}
+
+pub fn part2() -> Result<u32, Box<Error>> {
+    let timeline = read_timeline()?;
+    let sleep_spans = build_sleep_spans(&timeline);
+
+    let minute_map = make_minutes_map(&mut sleep_spans.iter());
+
+    let most_common_guard_minute: (Guard, Minute) = *minute_map
+        .iter()
+        .max_by_key(|pair| pair.1)
+        .expect("No minutes")
+        .0;
+
+    println!(
+        "{:?}, {:?}, Product: {}",
+        most_common_guard_minute.0,
+        most_common_guard_minute.1,
+        (most_common_guard_minute.0).0 * (most_common_guard_minute.1).0
+    );
+
+    Ok((most_common_guard_minute.0).0 * (most_common_guard_minute.1).0)
 }
