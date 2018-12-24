@@ -1,6 +1,5 @@
 use chrono::prelude::*;
 use chrono::Duration;
-use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
@@ -8,7 +7,7 @@ use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Action {
-    ShiftStart(u32),
+    ShiftStart(Guard),
     Wake,
     Sleep,
 }
@@ -21,10 +20,16 @@ struct Entry {
 
 #[derive(Debug)]
 struct SleepSpan {
-    guard: u32,
+    guard: Guard,
     start: DateTime<Utc>,
     end: DateTime<Utc>,
 }
+
+#[derive(PartialEq, Eq, Debug, Copy, Clone, Hash)]
+struct Guard(u32);
+
+#[derive(PartialEq, Eq, Debug, Copy, Clone, Hash)]
+struct Minute(u32);
 
 use self::Action::*;
 
@@ -48,13 +53,13 @@ impl Entry {
     fn parse_shift_start(message: &str) -> Action {
         let tail = &message[7..];
         let guard_id_str = tail.split(' ').next().expect("Couldn't find guard ID");
-        let guard_id = u32::from_str(guard_id_str).expect("Can't parse guard ID");
-        Action::ShiftStart(guard_id)
+        let guard = Guard(u32::from_str(guard_id_str).expect("Can't parse guard ID"));
+        Action::ShiftStart(guard)
     }
 }
 
 impl SleepSpan {
-    fn new(guard: u32, start: DateTime<Utc>, end: DateTime<Utc>) -> SleepSpan {
+    fn new(guard: Guard, start: DateTime<Utc>, end: DateTime<Utc>) -> SleepSpan {
         SleepSpan { guard, start, end }
     }
 
@@ -63,13 +68,13 @@ impl SleepSpan {
     }
 
     // The minutes of the hour for which the guard was asleep
-    fn sleep_minutes(&self) -> Vec<u32> {
+    fn sleep_minutes(&self) -> Vec<Minute> {
         let mut time = self.start;
-        let mut result: Vec<u32> = Vec::new();
+        let mut result: Vec<Minute> = Vec::new();
 
         loop {
             if time.hour() == 0 {
-                result.push(time.minute());
+                result.push(Minute(time.minute()));
             }
 
             time = time + Duration::minutes(1);
@@ -97,7 +102,7 @@ fn read_timeline() -> Result<Vec<Entry>, Box<Error>> {
 
 fn build_sleep_spans(timeline: &[Entry]) -> Vec<SleepSpan> {
     let mut sleep_spans: Vec<SleepSpan> = Vec::new();
-    let mut guard: Option<u32> = None;
+    let mut guard: Option<Guard> = None;
     let mut sleep_start: Option<DateTime<Utc>> = None;
 
     for entry in timeline {
@@ -129,7 +134,7 @@ pub fn part1() -> Result<u32, Box<Error>> {
     let timeline = read_timeline()?;
     let sleep_spans = build_sleep_spans(&timeline);
 
-    let mut guard_sleep_times: HashMap<u32, Duration> = HashMap::new();
+    let mut guard_sleep_times: HashMap<Guard, Duration> = HashMap::new();
     for span in sleep_spans.iter() {
         let guard_sleep_time = guard_sleep_times
             .entry(span.guard)
@@ -138,7 +143,7 @@ pub fn part1() -> Result<u32, Box<Error>> {
         *guard_sleep_time = *guard_sleep_time + span.duration();
     }
 
-    let longest_guard: u32 = *guard_sleep_times
+    let longest_guard: Guard = *guard_sleep_times
         .iter()
         .max_by_key(|pair| pair.1)
         .expect("No sleep times")
@@ -148,7 +153,7 @@ pub fn part1() -> Result<u32, Box<Error>> {
         .iter()
         .filter(|span| span.guard == longest_guard);
 
-    let mut minutes_commonality: BTreeMap<u32, u32> = BTreeMap::new();
+    let mut minutes_commonality: HashMap<Minute, u32> = HashMap::new();
     for span in guard_spans {
         for minute in span.sleep_minutes() {
             let counter = minutes_commonality.entry(minute).or_insert(0);
@@ -156,18 +161,18 @@ pub fn part1() -> Result<u32, Box<Error>> {
         }
     }
 
-    let most_common_minute: u32 = *minutes_commonality
+    let most_common_minute: Minute = *minutes_commonality
         .iter()
         .max_by_key(|pair| pair.1)
         .expect("No minutes")
         .0;
 
     println!(
-        "Guard: {}, Minute: {}, Product: {}",
+        "{:?}, {:?}, Product: {}",
         longest_guard,
         most_common_minute,
-        longest_guard * most_common_minute
+        longest_guard.0 * most_common_minute.0
     );
 
-    Ok(longest_guard * most_common_minute)
+    Ok(longest_guard.0 * most_common_minute.0)
 }
