@@ -20,6 +20,7 @@ fn main() -> Result<(), Box<std::error::Error>> {
         ["day4", "part1"] => println!("{}", day4::part1()?),
         ["day4", "part2"] => println!("{}", day4::part2()?),
         ["day5", "part1"] => println!("{}", day5::part1()?),
+        ["day5", "part2"] => println!("{}", day5::part2()?),
         _ => panic!("Don't know how to {:?}", args),
     }
 

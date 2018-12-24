@@ -1,3 +1,5 @@
+use std::cmp::min;
+use std::collections::BTreeSet;
 use std::error::Error;
 use std::fs;
 use std::iter::Iterator;
@@ -25,14 +27,35 @@ fn remove_reaction(value: &mut String) -> bool {
     true
 }
 
-pub fn part1() -> Result<usize, Box<Error>> {
-    let mut string = fs::read_to_string("inputs/day5-1")?;
-    let mut removed = 0;
+fn fully_reacted_size(input: &str) -> usize {
+    let mut result = input.to_string();
     loop {
-        if !remove_reaction(&mut string) {
-            println!("Removed {} reactions", removed);
-            return Ok(string.len());
+        if !remove_reaction(&mut result) {
+            return result.len();
         }
-        removed += 1;
     }
+}
+
+pub fn part1() -> Result<usize, Box<Error>> {
+    let input = fs::read_to_string("inputs/day5-1")?;
+
+    Ok(fully_reacted_size(&input))
+}
+
+pub fn part2() -> Result<usize, Box<Error>> {
+    let input = fs::read_to_string("inputs/day5-1")?;
+
+    let unit_types: BTreeSet<char> = input.chars().map(|c| c.to_ascii_lowercase()).collect();
+
+    let mut min_size = usize::max_value();
+
+    for unit_type in unit_types {
+        let unit_removed = input.replace(&[unit_type, unit_type.to_ascii_uppercase()][..], "");
+        let size = fully_reacted_size(&unit_removed);
+        min_size = min(size, min_size);
+
+        println!("{} => {}", unit_type, size);
+    }
+
+    Ok(min_size)
 }
