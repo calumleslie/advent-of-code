@@ -1,14 +1,15 @@
 use std::collections::HashSet;
-use std::fs;
-use std::str::FromStr;
-use std::iter::Iterator;
 use std::error::Error;
+use std::fs;
+use std::iter::Iterator;
+use std::str::FromStr;
 
 fn read_file() -> Result<Vec<i32>, Box<Error>> {
     let file_contents = fs::read_to_string("inputs/day1-1")?;
 
     // Yes, yes, I know, the expect
-    let result: Vec<i32> = file_contents.lines()
+    let result: Vec<i32> = file_contents
+        .lines()
         .map(|line| i32::from_str(line).expect("Faild to read line"))
         .collect();
 

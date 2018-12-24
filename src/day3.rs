@@ -1,8 +1,8 @@
+use itertools::Itertools;
+use std::collections::HashSet;
 use std::error::Error;
 use std::fs;
 use std::str::FromStr;
-use itertools::Itertools;
-use std::collections::HashSet;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Claim {
@@ -43,7 +43,7 @@ impl Claim {
             left: left,
             top: top,
             width: width,
-            height: height
+            height: height,
         }
     }
 
@@ -56,21 +56,16 @@ impl Claim {
     }
 
     fn in_coord(&self, x: u32, y: u32) -> bool {
-        self.left <= x &&
-        self.right() > x &&
-        self.top <= y &&
-        self.bottom() > y
+        self.left <= x && self.right() > x && self.top <= y && self.bottom() > y
     }
 
     fn overlaps(&self, other: &Claim) -> bool {
-        let h_overlap = 
-            (self.left <= other.left && self.right() >= other.left) ||
-            (other.left <= self.left && other.right() >= self.left);
+        let h_overlap = (self.left <= other.left && self.right() >= other.left)
+            || (other.left <= self.left && other.right() >= self.left);
 
-        let v_overlap =
-            (self.top <= other.top && self.bottom() >= other.top) ||
-            (other.top <= self.top && other.bottom() >= self.top);
-        
+        let v_overlap = (self.top <= other.top && self.bottom() >= other.top)
+            || (other.top <= self.top && other.bottom() >= self.top);
+
         h_overlap && v_overlap
     }
 }
