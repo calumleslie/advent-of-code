@@ -7,3 +7,6 @@ edition = "2018"
 [dependencies]
 itertools = "0.8.0"
 chrono = "0.4"
+
+[profile.release]
+debug = true
