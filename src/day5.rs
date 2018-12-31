@@ -1,38 +1,47 @@
+use lazy_static::lazy_static;
+use regex::Regex;
 use std::cmp::min;
 use std::collections::BTreeSet;
 use std::error::Error;
 use std::fs;
 use std::iter::Iterator;
 
-fn char_pairs_with_indexes<'a>(input: &'a str) -> Box<Iterator<Item = (usize, (char, char))> + 'a> {
-    let iter1 = input.chars();
-    let mut iter2 = input.chars();
-    iter2.next();
-    Box::new(iter1.zip(iter2).enumerate())
+lazy_static! {
+    static ref RE: Regex = build_reaction_regex();
 }
 
-fn reactable(pair: (char, char)) -> bool {
-    (pair.0.is_uppercase() != pair.1.is_uppercase())
-        && (pair.0.to_ascii_lowercase() == pair.1.to_ascii_lowercase())
-}
-
-fn remove_reaction(value: &mut String) -> bool {
-    let reaction = char_pairs_with_indexes(value).find(|pair| reactable(pair.1));
-    if reaction.is_none() {
-        return false;
+fn build_reaction_regex() -> Regex {
+    let mut pattern: String = String::new();
+    let mut first = true;
+    pattern.push('(');
+    for c in "abcdefghijklmnopqrstuvwxyz".chars() {
+        if !first {
+            pattern.push('|');
+        }
+        first = false;
+        pattern.push(c);
+        pattern.push(c.to_ascii_uppercase());
+        pattern.push('|');
+        pattern.push(c.to_ascii_uppercase());
+        pattern.push(c);
     }
+    pattern.push(')');
+    return Regex::new(&pattern).unwrap();
+}
 
-    let index = reaction.expect("").0;
-    value.replace_range(index..(index + 2), "");
-    true
+fn remove_reaction(value: &str) -> String {
+    return RE.replace_all(value, "").into_owned();
 }
 
 fn fully_reacted_size(input: &str) -> usize {
     let mut result = input.to_string();
+    let mut last_len = result.len();
     loop {
-        if !remove_reaction(&mut result) {
+        result = remove_reaction(&result);
+        if result.len() == last_len {
             return result.len();
         }
+        last_len = result.len();
     }
 }
 

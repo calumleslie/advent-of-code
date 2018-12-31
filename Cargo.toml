@@ -7,6 +7,8 @@ edition = "2018"
 [dependencies]
 itertools = "0.8.0"
 chrono = "0.4"
+regex = "1"
+lazy_static = "1.2.0"
 
 [profile.release]
 debug = true
